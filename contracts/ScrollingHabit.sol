@@ -1,5 +1,4 @@
-// SPDX-License-Identifier: MIT
-// Compatible with OpenZeppelin Contracts ^5.0.0
+// SPDX-License-Identifier: Apache License 2.0
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -20,38 +19,23 @@ contract ScrollingHabit is ERC721, Ownable {
         address owner;
     }
 
-    mapping (uint256 tokenId => Habit habit) private _habits;
+    mapping(uint256 tokenId => Habit habit) private _habits;
 
     event TokenRecovery(address indexed token, uint256 amount);
     event Entry(address indexed owner, uint256 tokenId, uint256 amount);
 
-    constructor(address initialOwner)
-        ERC721("Checkbox Scrolling Habit", "CHECKSH")
-        Ownable(initialOwner)
-    {}
+    constructor(address initialOwner) ERC721("Checkbox Scrolling Habit", "CHECKSH") Ownable(initialOwner) {}
 
     function safeMint(string memory title, string memory metric) public {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
-        _habits[tokenId] = Habit ({
-            title: title,
-            metric: metric,
-            entries: 0,
-            isNumeric: true,
-            owner: msg.sender
-        });
+        _habits[tokenId] = Habit({title: title, metric: metric, entries: 0, isNumeric: true, owner: msg.sender});
     }
 
     function safeMint(string memory title) public {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
-        _habits[tokenId] = Habit ({
-            title: title,
-            metric: "",
-            entries: 0,
-            isNumeric: false,
-            owner: msg.sender
-        });
+        _habits[tokenId] = Habit({title: title, metric: "", entries: 0, isNumeric: false, owner: msg.sender});
     }
 
     function recoverToken(address token, uint256 amount) external onlyOwner {
@@ -79,24 +63,24 @@ contract ScrollingHabit is ERC721, Ownable {
         emit Entry(msg.sender, tokenId, amount);
     }
 
-    function habits() public view returns (Habit[] memory) {
+    function getHabits() public view returns (Habit[] memory) {
         uint256 tokenCount = _nextTokenId;
         uint256 habitCount = 0;
-        for(uint256 i = 0; i < tokenCount; i++) {
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_habits[i].owner == msg.sender) {
                 habitCount++;
             }
         }
 
         uint256 j = 0;
-        Habit[] memory list = new Habit[](habitCount);
-        for(uint256 i = 0; uint256j = 0; i < tokenCount; i++) {
+        Habit[] memory habitList = new Habit[](habitCount);
+        for (uint256 i = 0; i < tokenCount; i++) {
             if (_habits[i].owner == msg.sender) {
-                list[j] = _habits[i]; 
+                habitList[j] = _habits[i];
                 j++;
             }
         }
 
-        return list;
+        return habitList;
     }
 }
