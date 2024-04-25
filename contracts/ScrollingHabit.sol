@@ -102,7 +102,6 @@ contract ScrollingHabit is ERC721, Ownable {
     /*                     CUSTOM METHODS                         */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-
     function recoverToken(address token, uint256 amount) external onlyOwner {
         IERC20(token).transfer(address(msg.sender), amount);
         emit TokenRecovery(token, amount);
