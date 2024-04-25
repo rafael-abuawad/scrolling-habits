@@ -2,6 +2,7 @@ name: scrolling-habits
 
 plugins:
   - name: solidity
+  - name: foundry
 
 dependencies:
   - name: OpenZeppelin

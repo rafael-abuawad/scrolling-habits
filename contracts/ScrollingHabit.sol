@@ -7,9 +7,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ScrollingHabit is ERC721, Ownable {
     error ERC721InvalidTokenOwner();
-    error ERC721HabitIsNotNumeric();
+    error ScrollingHabitIsNotNumeric();
+    error ScrollingHabitNotEnoughTimeHasPassed();
 
     uint256 private _nextTokenId;
+    uint256 private constant DELAY = 86400;
 
     struct Habit {
         string title;
@@ -20,22 +22,25 @@ contract ScrollingHabit is ERC721, Ownable {
     }
 
     mapping(uint256 tokenId => Habit habit) private _habits;
+    mapping(uint256 tokenId => uint256 timestamp) private _habitTimestamps;
 
     event TokenRecovery(address indexed token, uint256 amount);
     event Entry(address indexed owner, uint256 tokenId, uint256 amount);
 
-    constructor(address initialOwner) ERC721("Checkbox Scrolling Habit", "CHECKSH") Ownable(initialOwner) {}
+    constructor(address initialOwner) ERC721("Scrolling Habit", "SCROLLHABIT") Ownable(initialOwner) {}
 
     function safeMint(string memory title, string memory metric) public {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
         _habits[tokenId] = Habit({title: title, metric: metric, entries: 0, isNumeric: true, owner: msg.sender});
+        _habitTimestamps[tokenId] = block.timestamp - DELAY - 1; // is cheaper to read from a variable not set to 0
     }
 
     function safeMint(string memory title) public {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
         _habits[tokenId] = Habit({title: title, metric: "", entries: 0, isNumeric: false, owner: msg.sender});
+        _habitTimestamps[tokenId] = block.timestamp - DELAY - 1; // is cheaper to read from a variable not set to 0
     }
 
     function recoverToken(address token, uint256 amount) external onlyOwner {
@@ -47,7 +52,11 @@ contract ScrollingHabit is ERC721, Ownable {
         if (ownerOf(tokenId) != msg.sender) {
             revert ERC721InvalidTokenOwner();
         }
+        if (block.timestamp < _habitTimestamps[tokenId] + DELAY) {
+            revert ScrollingHabitNotEnoughTimeHasPassed();
+        }
         _habits[tokenId].entries++;
+        _habitTimestamps[tokenId] = block.timestamp;
         emit Entry(msg.sender, tokenId, 1);
     }
 
@@ -55,12 +64,23 @@ contract ScrollingHabit is ERC721, Ownable {
         if (ownerOf(tokenId) != msg.sender) {
             revert ERC721InvalidTokenOwner();
         }
-        Habit memory habit = _habits[tokenId];
-        if (!habit.isNumeric) {
-            revert ERC721HabitIsNotNumeric();
+        if (block.timestamp < _habitTimestamps[tokenId] + DELAY) {
+            revert ScrollingHabitNotEnoughTimeHasPassed();
         }
-        habit.entries += amount;
+        if (!_habits[tokenId].isNumeric) {
+            revert ScrollingHabitIsNotNumeric();
+        }
+        _habits[tokenId].entries += amount;
+        _habitTimestamps[tokenId] = block.timestamp;
         emit Entry(msg.sender, tokenId, amount);
+    }
+
+
+    function getHabit(uint256 tokenId) public view returns (Habit memory) {
+        if (ownerOf(tokenId) != msg.sender) {
+            revert ERC721InvalidTokenOwner();
+        }
+        return _habits[tokenId];
     }
 
     function getHabits() public view returns (Habit[] memory) {
