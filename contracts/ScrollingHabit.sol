@@ -4,8 +4,11 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract ScrollingHabit is ERC721, Ownable {
+    using Strings for string;
+
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                       CUSTOM ERRORS                        */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
@@ -13,11 +16,13 @@ contract ScrollingHabit is ERC721, Ownable {
     /// @dev The caller is not the owner of the NFT
     error ScrollingHabit__InvalidTokenOwner();
 
-    /// @dev Tryed to interact with a differente type of Habit intended
-    error ScrollingHabit__IsNotNumeric();
-
     /// @dev Cannot log a habit more than once a day
     error ScrollingHabit__NotEnoughTimeHasPassed();
+
+    /// @dev Tried to updated non-complex habit
+    ///      - Simple: No metric ("")
+    ///      - Complex: Metric 
+    error ScrollingHabit__HabitIsNotAComplexHabit();
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           EVENTS                           */
@@ -36,12 +41,13 @@ contract ScrollingHabit is ERC721, Ownable {
     /// @dev Token ID counter
     uint256 private _nextTokenId;
 
-    /// @dev One day in seconds, used to limit the entrys at
-    ///      one per day.
+    /// @dev One day in seconds, used to limit the entrys.
     uint256 private constant DELAY = 86400;
 
-    /// @dev Mapping of habits to a specific token ID
+    /// @dev Mapping of a token ID to a habit
     mapping(uint256 tokenId => Habit habit) private _habits;
+
+    /// @dev Mapping of a token ID to a list of habit entries
     mapping(uint256 tokenId => Entry[] entries) private _entries;
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -50,10 +56,8 @@ contract ScrollingHabit is ERC721, Ownable {
 
     /// @dev A Habit struct.
     struct Habit {
-        address owner;
         string title;
         string metric;
-        bool isNumeric;
     }
 
     /// @dev A Habit entry struct.
@@ -72,16 +76,16 @@ contract ScrollingHabit is ERC721, Ownable {
     /*                           ERC721                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    function safeMint(string memory title, string memory metric) external {
-        uint256 tokenId = _nextTokenId++;
-        _safeMint(msg.sender, tokenId);
-        _habits[tokenId] = Habit({owner: msg.sender, title: title, metric: metric, isNumeric: true});
-    }
-
     function safeMint(string memory title) external {
         uint256 tokenId = _nextTokenId++;
         _safeMint(msg.sender, tokenId);
-        _habits[tokenId] = Habit({owner: msg.sender, title: title, metric: "", isNumeric: false});
+        _habits[tokenId] = Habit({title: title, metric: ""});
+    }
+    
+    function safeMint(string memory title, string memory metric) external {
+        uint256 tokenId = _nextTokenId++;
+        _safeMint(msg.sender, tokenId);
+        _habits[tokenId] = Habit({title: title, metric: metric});
     }
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
@@ -121,6 +125,10 @@ contract ScrollingHabit is ERC721, Ownable {
             }
         }
 
+        if (_habits[tokenId].metric.equal("")) {
+            revert ScrollingHabit__HabitIsNotAComplexHabit();
+        }
+
         _entries[tokenId].push(Entry({amount: amount, timestamp: block.timestamp}));
         emit EntryAdded(msg.sender, tokenId, amount);
     }
@@ -140,7 +148,7 @@ contract ScrollingHabit is ERC721, Ownable {
         uint256 tokenCount = _nextTokenId;
         uint256 habitCount = 0;
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_habits[i].owner == msg.sender) {
+            if (ownerOf(i) == msg.sender) {
                 habitCount++;
             }
         }
@@ -148,7 +156,7 @@ contract ScrollingHabit is ERC721, Ownable {
         uint256 j = 0;
         Habit[] memory habitList = new Habit[](habitCount);
         for (uint256 i = 0; i < tokenCount; i++) {
-            if (_habits[i].owner == msg.sender) {
+            if (ownerOf(i) == msg.sender) {
                 habitList[j] = _habits[i];
                 j++;
             }
@@ -158,7 +166,9 @@ contract ScrollingHabit is ERC721, Ownable {
     }
 
     function getEntries(uint256 tokenId) public view returns (Entry[] memory) {
-
-        
+        if (ownerOf(tokenId) != msg.sender) {
+            revert ScrollingHabit__InvalidTokenOwner();
+        }
+        return _entries[tokenId];
     }
 }
