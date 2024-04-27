@@ -1,14 +1,14 @@
 import ape
+import time
 import random
 
 DELAY = 86400
-
-current_time_stamp = 1714096330
+current_time_stamp = int(time.time())
 
 
 def mine_block():
     global current_time_stamp
-    current_time_stamp += DELAY
+    current_time_stamp += DELAY + 100
     ape.chain.provider.set_timestamp(current_time_stamp)
     ape.chain.provider.mine()
 

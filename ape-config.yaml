@@ -12,3 +12,8 @@ dependencies:
 solidity:
   import_remapping:
     - "@openzeppelin/contracts=OpenZeppelin/5.0.2"
+
+geth:
+  ethereum:
+    sepolia:
+      uri: https://ethereum-sepolia-rpc.publicnode.com

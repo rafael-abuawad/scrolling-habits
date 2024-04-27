@@ -102,11 +102,8 @@ contract ScrollingHabit is ERC721, Ownable {
             revert ScrollingHabit__InvalidTokenOwner();
         }
 
-        if (_entries[tokenId].length != 0) {
-            uint256 idx = _entries[tokenId].length - 1;
-            if (block.timestamp < _entries[tokenId][idx].timestamp + DELAY) {
-                revert ScrollingHabit__NotEnoughTimeHasPassed();
-            }
+        if (!canAddNewEntry(tokenId)) {
+            revert ScrollingHabit__NotEnoughTimeHasPassed();
         }
 
         _entries[tokenId].push(Entry({amount: 1, timestamp: block.timestamp}));
@@ -118,11 +115,8 @@ contract ScrollingHabit is ERC721, Ownable {
             revert ScrollingHabit__InvalidTokenOwner();
         }
         
-        if (_entries[tokenId].length != 0) {
-            uint256 idx = _entries[tokenId].length - 1;
-            if (block.timestamp < _entries[tokenId][idx].timestamp + DELAY) {
-                revert ScrollingHabit__NotEnoughTimeHasPassed();
-            }
+        if (!canAddNewEntry(tokenId)) {
+            revert ScrollingHabit__NotEnoughTimeHasPassed();
         }
 
         if (_habits[tokenId].metric.equal("")) {
@@ -136,6 +130,14 @@ contract ScrollingHabit is ERC721, Ownable {
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                          GETTERS                           */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
+
+    function canAddNewEntry(uint256 tokenId) public view returns (bool) {
+        if (_entries[tokenId].length != 0) {
+            uint256 idx = _entries[tokenId].length - 1;
+            return block.timestamp > _entries[tokenId][idx].timestamp + DELAY;
+        }
+        return true;
+    }
 
     function getHabit(uint256 tokenId) public view returns (Habit memory) {
         if (ownerOf(tokenId) != msg.sender) {
@@ -158,6 +160,27 @@ contract ScrollingHabit is ERC721, Ownable {
         for (uint256 i = 0; i < tokenCount; i++) {
             if (ownerOf(i) == msg.sender) {
                 habitList[j] = _habits[i];
+                j++;
+            }
+        }
+
+        return habitList;
+    }
+
+    function getHabitsIDs() public view returns (uint256[] memory) {
+        uint256 tokenCount = _nextTokenId;
+        uint256 habitCount = 0;
+        for (uint256 i = 0; i < tokenCount; i++) {
+            if (ownerOf(i) == msg.sender) {
+                habitCount++;
+            }
+        }
+
+        uint256 j = 0;
+        uint256[] memory habitList = new uint256[](habitCount);
+        for (uint256 i = 0; i < tokenCount; i++) {
+            if (ownerOf(i) == msg.sender) {
+                habitList[j] = i;
                 j++;
             }
         }
