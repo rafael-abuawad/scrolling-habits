@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: Apache License 2.0
+// @author Rafael Abuawad <https://twitter.com/rabuawad_>
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
