@@ -9,10 +9,22 @@ import {
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 import NewHabitForm from "./new-habit-form";
+import { useState } from "react";
 
-export function AddHabitButton() {
+export interface AddHabitButtonProps {
+  onHabitCreated: (hash: `0x${string}` | undefined) => void;
+}
+
+export function AddHabitButton(props: AddHabitButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  function handleHabitCreated(hash: `0x${string}` | undefined) {
+    setIsOpen(false);
+    props.onHabitCreated(hash);
+  }
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button className="w-full">
           <Plus /> Add Habit
@@ -25,7 +37,7 @@ export function AddHabitButton() {
             Add a new habit to your collection.
           </DialogDescription>
         </DialogHeader>
-        <NewHabitForm></NewHabitForm>
+        <NewHabitForm onHabitCreated={handleHabitCreated} />
       </DialogContent>
     </Dialog>
   );

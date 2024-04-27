@@ -1,5 +1,6 @@
+import { Loader2 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FieldErrors, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "./ui/button";
 import {
@@ -13,7 +14,9 @@ import {
 } from "./ui/form";
 import { Input } from "./ui/input";
 import { Checkbox } from "./ui/checkbox";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { wagmiContractConfig } from "@/lib/contracts";
 
 const FormSchema = z.object({
   title: z.string().min(2, {
@@ -23,8 +26,14 @@ const FormSchema = z.object({
   isSimple: z.boolean().optional(),
 });
 
-export default function NewHabitForm() {
+export interface NewHabitFormProps {
+  onHabitCreated: (hash: `0x${string}` | undefined) => void;
+}
+
+export default function NewHabitForm(props: NewHabitFormProps) {
   const [isSimpleHabit, setIsSimpleHabit] = useState(true);
+
+  const { writeContractAsync, data: hash } = useWriteContract();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -35,23 +44,35 @@ export default function NewHabitForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    console.log(data);
+  const { isFetching, isPending, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (data.isSimple) {
+      await writeContractAsync({
+        ...wagmiContractConfig,
+        functionName: "safeMint",
+        args: [data.title],
+      });
+    } else {
+      await writeContractAsync({
+        ...wagmiContractConfig,
+        functionName: "safeMint",
+        args: [data.title, data.metric!],
+      });
+    }
   }
 
-  function onErrors(
-    data: FieldErrors<{
-      title: string;
-      metric?: string | undefined;
-      isSimple?: boolean | undefined;
-    }>,
-  ) {
-    console.log(data);
-  }
+  useEffect(() => {
+    if (isFetching && !isPending && isSuccess) {
+      props.onHabitCreated(hash);
+    }
+  }, [hash, isFetching, isPending, isSuccess, props]);
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit, onErrors)}>
+      <form onSubmit={form.handleSubmit(onSubmit, console.error)}>
         <div className="space-y-6">
           <FormField
             control={form.control}
@@ -111,8 +132,15 @@ export default function NewHabitForm() {
               </FormItem>
             )}
           />
-
-          <Button type="submit">Create habit</Button>
+          <Button type="submit" disabled={isFetching && isPending}>
+            {isFetching && isPending && (
+              <span className="flex flex-row space-x-2">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing transaction
+              </span>
+            )}
+            {!(isFetching && isPending) && "Create habit"}
+          </Button>
         </div>
       </form>
     </Form>

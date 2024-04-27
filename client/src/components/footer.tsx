@@ -18,13 +18,20 @@ export default function Footer() {
           <p className="text-gray-500 dark:text-neutral-500">
             Developed by{" "}
             <Button asChild variant="link" className="px-0">
-              <a href="#">Rafael Abuawad</a>
+              <a href="https://twitter.com/rabuawad_" target="_blank">
+                Rafael Abuawad
+              </a>
             </Button>
           </p>
           <p className="text-gray-500 dark:text-neutral-500 text-md">
             Free & Open Source, you can learn more about it{" "}
             <Button asChild variant="link" className="px-0">
-              <a href="#">here</a>
+              <a
+                href="https://github.com/rafael-abuawad/scrolling-habits/"
+                target="_blank"
+              >
+                here
+              </a>
             </Button>
             .
           </p>
@@ -33,19 +40,22 @@ export default function Footer() {
         <div className="mt-3 space-x-2">
           <a
             className="size-12 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700"
-            href="#"
+            href="https://github.com/rafael-abuawad/"
+            target="_blank"
           >
             <Github />
           </a>
           <a
             className="size-12 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700"
-            href="#"
+            href="https://www.linkedin.com/in/rafael-abuawad-vivanco-783648260/"
+            target="_blank"
           >
             <Linkedin />
           </a>
           <a
             className="size-12 inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full border border-transparent text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:text-neutral-400 dark:hover:bg-neutral-700"
-            href="#"
+            href="https://twitter.com/rabuawad_"
+            target="_blank"
           >
             <TwitterIcon />
           </a>

@@ -1,4 +1,3 @@
-import { ConnectKitButton } from "connectkit";
 import {
   Card,
   CardDescription,
@@ -6,19 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
+import { AddHabitButton } from "./add-habit-button";
 
-export default function NoWallet() {
+export default function NoHabits() {
   return (
     <Card className="w-full">
       <CardHeader className="text-center">
-        <CardTitle>Wallet not connected</CardTitle>
+        <CardTitle>You haven't created any habits</CardTitle>
         <CardDescription>
-          Connect your wallet to interact with application.
+          Go ahead and create your first habbit!
         </CardDescription>
       </CardHeader>
       <CardFooter>
         <div className="w-full flex justify-center items-center">
-          <ConnectKitButton theme="soft" />
+          <AddHabitButton onHabitCreated={() => {}} />
         </div>
       </CardFooter>
     </Card>
