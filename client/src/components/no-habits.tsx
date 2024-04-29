@@ -6,8 +6,14 @@ import {
   CardTitle,
 } from "./ui/card";
 import { AddHabitButton } from "./add-habit-button";
+import { LucideRefreshCcw } from "lucide-react";
+import { Button } from "./ui/button";
 
-export default function NoHabits() {
+export interface NoHabitsProps {
+  onHabitCreated: () => void;
+}
+
+export default function NoHabits(props: NoHabitsProps) {
   return (
     <Card className="w-full">
       <CardHeader className="text-center">
@@ -17,8 +23,11 @@ export default function NoHabits() {
         </CardDescription>
       </CardHeader>
       <CardFooter>
-        <div className="w-full flex justify-center items-center">
-          <AddHabitButton onHabitCreated={() => {}} />
+        <div className="w-full flex justify-center items-center space-x-2">
+          <Button onClick={props.onHabitCreated}>
+            <LucideRefreshCcw />
+          </Button>
+          <AddHabitButton onHabitCreated={props.onHabitCreated} />
         </div>
       </CardFooter>
     </Card>

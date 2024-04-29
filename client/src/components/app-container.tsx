@@ -16,7 +16,15 @@ export default function AppContainer() {
 
   if (isConnected) {
     if (data == undefined || data.length == 0) {
-      return <NoHabits />;
+      return (
+        <NoHabits
+          onHabitCreated={() =>
+            setTimeout(() => {
+              refetch();
+            }, 3000)
+          }
+        />
+      );
     }
 
     if (isLoading) {
@@ -35,7 +43,8 @@ export default function AppContainer() {
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">Habits</h2>
           <p className="text-muted-foreground">
-            Manage your account habits and check your progress. Remember <b>you can only add one entry per habit per day.</b>
+            Manage your account habits and check your progress. Remember{" "}
+            <b>you can only add one entry per habit per day.</b>
           </p>
         </div>
         <Search onHabitCreated={refetch} refetch={refetch} />
