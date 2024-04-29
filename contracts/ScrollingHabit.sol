@@ -71,7 +71,7 @@ contract ScrollingHabit is ERC721, Ownable {
     /*                         CONSTRUCTOR                        */
     /*.•°:°.´+˚.*°.˚:*.´•*.+°.•°:´*.´•*.•°.•°:°.´:•˚°.*°.˚:*.´+°.•*/
 
-    constructor(address initialOwner) ERC721("Scrolling Habit", "SCROLLHABIT") Ownable(initialOwner) {}
+    constructor() ERC721("Scrolling Habit", "SCROLLHABIT") Ownable(msg.sender) {}
 
     /*´:°•.°+.*•´.*:˚.°*.˚•´.°:°•.°•.*•´.*:˚.°*.˚•´.°:°•.°+.*•´.*:*/
     /*                           ERC721                           */

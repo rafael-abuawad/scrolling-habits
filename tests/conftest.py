@@ -13,4 +13,4 @@ def user(accounts):
 
 @pytest.fixture(scope="module")
 def scrolling_habit(project, sender):
-    return project.ScrollingHabit.deploy(sender, sender=sender)
+    return project.ScrollingHabit.deploy(sender=sender)
