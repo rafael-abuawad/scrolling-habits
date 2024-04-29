@@ -35,7 +35,7 @@ export default function AppContainer() {
         <div className="space-y-0.5">
           <h2 className="text-2xl font-bold tracking-tight">Habits</h2>
           <p className="text-muted-foreground">
-            Manage your account habits and check your progress.
+            Manage your account habits and check your progress. Remember <b>you can only add one entry per habit per day.</b>
           </p>
         </div>
         <Search onHabitCreated={refetch} refetch={refetch} />
