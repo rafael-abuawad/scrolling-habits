@@ -1,9 +1,4 @@
-import {
-  useAccount,
-  useReadContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import {
   CardTitle,
   CardDescription,
@@ -17,8 +12,8 @@ import { wagmiContractConfig } from "@/lib/contracts";
 import { timestampToDate } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Loader2, LucideRefreshCcw } from "lucide-react";
 
 export interface Entry {
   value: number;
@@ -38,58 +33,65 @@ export interface HabitCardProps {
 // https://nivo.rocks/time-range/
 export default function HabitCard({ tokenId }: HabitCardProps) {
   const { address } = useAccount();
-
   const [amount, setAmount] = useState(0);
-
   const { data: habit } = useReadContract({
     ...wagmiContractConfig,
     functionName: "getHabit",
     args: [BigInt(tokenId)],
     account: address,
   });
-
   const { data: entries, refetch } = useReadContract({
     ...wagmiContractConfig,
     functionName: "getEntries",
     args: [BigInt(tokenId)],
     account: address,
   });
-
   const { data: canAddEntry, refetch: canAddEntryRefetch } = useReadContract({
     ...wagmiContractConfig,
     functionName: "canAddNewEntry",
     args: [BigInt(tokenId)],
     account: address,
   });
-
-  const { writeContractAsync, data: hash } = useWriteContract();
-
-  const { isFetching, isPending, isSuccess } = useWaitForTransactionReceipt({
-    hash,
-  });
+  const { writeContractAsync, isPending } = useWriteContract();
 
   async function addEntry() {
     if (habit?.metric == "") {
-      await writeContractAsync({
-        ...wagmiContractConfig,
-        functionName: "entry",
-        args: [BigInt(tokenId)],
-      });
+      await writeContractAsync(
+        {
+          ...wagmiContractConfig,
+          functionName: "entry",
+          args: [BigInt(tokenId)],
+        },
+        {
+          onSuccess() {
+            refetch();
+            canAddEntryRefetch();
+            setAmount(0);
+          },
+        },
+      );
     } else {
-      await writeContractAsync({
-        ...wagmiContractConfig,
-        functionName: "entry",
-        args: [BigInt(tokenId), BigInt(amount)],
-      });
+      await writeContractAsync(
+        {
+          ...wagmiContractConfig,
+          functionName: "entry",
+          args: [BigInt(tokenId), BigInt(amount)],
+        },
+        {
+          onSuccess() {
+            refetch();
+            canAddEntryRefetch();
+            setAmount(0);
+          },
+        },
+      );
     }
   }
 
-  useEffect(() => {
-    if (isFetching && !isPending && isSuccess) {
-      refetch();
-      canAddEntryRefetch();
-    }
-  }, [canAddEntryRefetch, hash, isFetching, isPending, isSuccess, refetch]);
+  function reloadAllQueries() {
+    refetch();
+    canAddEntryRefetch();
+  }
 
   if (habit == undefined) {
     return (
@@ -166,17 +168,17 @@ export default function HabitCard({ tokenId }: HabitCardProps) {
               placeholder={habit.metric}
             />
           )}
-          <Button
-            onClick={addEntry}
-            disabled={!canAddEntry || (isPending && isFetching)}
-          >
-            {isPending && isFetching && (
+          <Button onClick={addEntry} disabled={!canAddEntry || isPending}>
+            {isPending && (
               <span className="flex flex-row space-x-2">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Processing transaction
               </span>
             )}
-            {!(isPending && isFetching) && "Add entry"}
+            {!isPending && "Add entry"}
+          </Button>
+          <Button onClick={reloadAllQueries}>
+            <LucideRefreshCcw />
           </Button>
         </div>
       </CardFooter>

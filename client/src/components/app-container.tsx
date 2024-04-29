@@ -38,7 +38,7 @@ export default function AppContainer() {
             Manage your account habits and check your progress.
           </p>
         </div>
-        <Search onHabitCreated={() => refetch()} />
+        <Search onHabitCreated={refetch} refetch={refetch} />
         <div className="grid lg:grid-cols-2 gap-4">
           {data.map((tokenId) => (
             <HabitCard key={tokenId} tokenId={tokenId} />

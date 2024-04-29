@@ -1,7 +1,7 @@
 import { Address } from "viem";
 
 export const wagmiContractConfig = {
-  address: "0x9c2eeac55433e3510581A070e253165a6D3864Bc" as Address,
+  address: import.meta.env.VITE_SCROLLING_HABIT_ADDRESS as Address,
   abi: [
     {
       inputs: [

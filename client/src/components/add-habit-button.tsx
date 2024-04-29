@@ -12,21 +12,21 @@ import NewHabitForm from "./new-habit-form";
 import { useState } from "react";
 
 export interface AddHabitButtonProps {
-  onHabitCreated: (hash: `0x${string}` | undefined) => void;
+  onHabitCreated: () => void;
 }
 
 export function AddHabitButton(props: AddHabitButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  function handleHabitCreated(hash: `0x${string}` | undefined) {
+  function handleHabitCreated() {
     setIsOpen(false);
-    props.onHabitCreated(hash);
+    props.onHabitCreated();
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">
+        <Button>
           <Plus /> Add Habit
         </Button>
       </DialogTrigger>

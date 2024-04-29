@@ -10,7 +10,7 @@ const config = createConfig(
     chains: [scrollSepolia],
 
     // Required API Keys
-    walletConnectProjectId: "5770b42c91b106a9dff9a62d88e57225",
+    walletConnectProjectId: import.meta.env.VITE_WALLETCONNECT_PROJECT_ID,
 
     // Required App Info
     appName: "Scrolling Habits",
@@ -18,8 +18,9 @@ const config = createConfig(
     // Optional App Info
     appDescription:
       "Track your habits on-chain with beautiful calendar heat maps.",
-    appUrl: "https://family.co", // your app's url
-    appIcon: "https://family.co/logo.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
+    appUrl: "https://github.com/rafael-abuawad/scrolling-habits/", // your app's url
+    appIcon:
+      "https://scroll.io/static/media/Scroll_FullLogo.f99e4b7ab52f474105da.png", // your app's icon, no bigger than 1024x1024px (max. 1MB)
   }),
 );
 
